@@ -1,0 +1,5 @@
+{
+    "sv": ["Vivik", 25, "La vie, c'est beau. Parfois."],
+    "sm": ["Mortak", 10, "La douleur engendre la résilience. Ou la folie."],
+    "sa": ["Aleak", 15, "Une existence sans surprise est une existence sans saveur. Dit-on."]
+}

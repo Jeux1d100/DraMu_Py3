@@ -1,10 +1,12 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
 import sys
 import os
 import random
 import time
+import json
+from operator import itemgetter
 
 # import avatar
 import bestiary
@@ -31,24 +33,27 @@ class Avatar(object):
         self.name = name # Nom de l'ego (avatar du joueur)
         self.maxhealth = 100 # Santé maximum de l'ego
         self.health = 40 # Santé actuelle de l'ego
-        self.baseattack = 10 # Attaque de base de l'ego
-        self.curweap = "Mains Nues" # Arme équipée, qui s'ajoute à baseattack
+        self.baseattack = 5 # Attaque de base de l'ego
+        self.curweap = "Aucune" # Arme équipée, qui s'ajoute à baseattack
         self.jeto = 50 # total de Jetons, monnaie du DraMu
         self.abo = 0 # total d'abonnés, ressource
         self.matorg = 0 # Total de Matière Organique, ressource
         self.rubujo = 0 # Total de Rubujoj (déchets), ressource
         self.serum = 3 # Total de sérum, potion de soin et autre drogues
         self.buff = 0 # Effet actif sur l'ego
+        self.inventory = json.load(open("inventory.txt"))
 
-    def attack(self):
-        attack = self.baseattack
-        if self.curweap == "Mains Nues":
-            attack += 0
-        return attack
+    # def attack(self):
+    #     attack = self.baseattack
+    #     if self.curweap == "Aucune":
+    #         self.weapdmg += 2
+    #     elif self.curweap == "Lii":
+    #         self.weapdmg += 10
+    #     return attack
 
     def do_attack():
 #        os.system("clear")
-        avatar_attack =  random.randint(5,10)  # Dégâts de l'ego
+        avatar_attack =  ego.baseattack + random.randint(8,12)  # Dégâts de l'ego
         challenger_attack = random.randint(3,5) # Dégâts de l'adversaire
 
         challenger.health -= avatar_attack
@@ -72,6 +77,13 @@ class Avatar(object):
 
 def main():
     os.system("clear")
+    inventory = {
+        'Sword': {'attack': 5, 'defence': 1, 'weight': 15, 'price': 2},
+        'Armor': {'attack': 0, 'defence': 10, 'weight': 25, 'price': 5}
+        }
+    for name, item in inventory.items():
+        print ("{0}: {1[attack]} {1[defence]} {1[weight]} {1[price]}".format(name, item))
+
     print ("Menu")
     print ("  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
     print ("                                                                        ")
@@ -81,7 +93,7 @@ def main():
     print ("                                                                           ")
     print ("      n - nouvelle partie                                                  ")
     print ("                                                                           ")
-    print ("      q - quitter                                                          ")
+    print ("      q (ou Entrée) - quitter                                              ")
     print ("                                                                           ")
     print ("  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
     print ("                                                                           ")
@@ -90,21 +102,27 @@ def main():
         avatar_creation_name()
     elif option =="q":
         sys.exit()
-    elif option =="aide" :
+    elif option =="aide":
         go_help()
-    elif option =="w" :
+    elif option =="w":
         go_hub()
+    elif option =="":
+        sys.exit()
     else:
         sys.exit()
 
 def avatar_creation_name():
     os.system("clear")
-    print ("  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
+    print ("Avatar")
+    print ("  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
     print("")
     print ("      Création de l'avatar.                                            ")
     print ("")
-    print ("  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n")
+    print ("  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
+    print ("")
     option = input(Colour.DARKCYAN + "   Choisissez un nom -> " + Colour.END)
+    while not option :
+        option = input(Colour.DARKCYAN + "   Choisissez un nom -> " + Colour.END)
     global ego
     ego = Avatar(option)
     go_hub()
@@ -113,6 +131,10 @@ def avatar_creation_name():
 def go_hub():
     while True:
         os.system("clear")
+        # for indice, description in sorted(ego.inventory.items(), key=lambda x: x[0][1][1]):
+        #     print ("      {0:} - {1:10} JTS {2:} ({3:})".format(indice, description[0], description[1], description[2]))
+        # for indice, description in sorted(ego.inventory.items(), key=lambda x: x[1][1][1]):
+        #     print ("      {0:} - {1:10} JTS {2:} ({3:})".format(indice, description[0], description[1], description[2]))
         print ("Antre")
         print ("  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
         print ("                                                                           ")
@@ -126,9 +148,8 @@ def go_hub():
         print ("      x - préparer une expédition                                          ")
         print ("      i - voir votre statut et inventaire                                  ")
         print ("      ? - ouvrir une page d'aide                                           ")
-
         print ("                                                                           ")
-        print ("      q - quitter DraMu                                             ")
+        print ("      q (ou Entrée) - quitter DraMu                                                    ")
         print ("                                                                           ")
         print ("  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
         print ("                                                                           ")
@@ -136,18 +157,18 @@ def go_hub():
         if option == "a":
             select_challenger()
         elif option == "b":
-            go_store()
+            go_shop()
         elif option == "m":
             go_mutation_prepare()
         elif option == "x":
             go_expedition_prepare()
         elif option == "i":
             go_info()
-        elif option =="?":
+        elif option == "?":
             go_help()
-        elif option == "k": #arrêter la boucle mais pas le programme
-            break
         elif option == "q": #arrêter le programme et sortir
+            sys.exit()
+        elif option == "":
             sys.exit()
         else:
             print("      Ce choix n'est pas valide")
@@ -155,20 +176,16 @@ def go_hub():
 
 def select_challenger():
     os.system("clear")
+    print ("Introduction")
     print ("  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
     print ("                                                                           ")
-    print ("      Un véhicule blindé vous transporte jusqu'aux portes de l'arène.      ")
-    print ("      Le trajet est long et pénible. Depuis l'arrière du fourgon,          ")
-    print ("      l'air est rare et chaud, et vous ne voyez rien du décor extérieur.   ")
-    print ("                                                                           ")
-    print ("      Enfin, le camion ralentit et manoeuvre.                              ")
-    print ("      Vous entendez les lourdes portes de l'arène s'ouvrir.                ")
-    print ("                                                                           ")
-    print ("      Qui sera votre adversaire ?                                          ")
+    intro = json.load(open("intro.txt"))
+    for i, blabla in sorted(intro.items(), key=lambda x:x[0]):
+        print ("{}".format(blabla))
     print ("                                                                           ")
     print ("  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
     print ("                                                                           ")
-    #option = input(Colour.DARKCYAN + "   Appuyez sur Entrée pour continuer..." + Colour.END).lower()
+    option = input(Colour.DARKCYAN + "   Touche Entrée pour continuer..." + Colour.END).lower()
     global challenger
     challenger = (random.choice(bestiary.BESTIARY))
     # challenger_type = random.randint(1, 99)
@@ -194,7 +211,7 @@ def go_arena():
     print (" ")
     print ("  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
     print ("                                                                           ")
-    print ("      a - attaquer                                                         ")
+    print ("      a (ou Entrée) - attaquer                                                         ")
     print ("      f - fuir et abandonner le combat                                     ")
     print ("                                                                           ")
     print ("  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
@@ -202,84 +219,146 @@ def go_arena():
     option = input(Colour.DARKCYAN + "   Votre choix -> " + Colour.END).lower()
     if option == "a":
         Avatar.do_attack()
+    elif option =="":
+        Avatar.do_attack()
     elif option == "f":
         Avatar.do_flee()
     else:
         print("      Ce choix n'est pas valide")
         go_arena()
 
-def go_store():
+def go_shop():
     os.system("clear")
-    print ("Boutique")
+    print ("Boutique Interface")
     print ("  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
     print ("                                                                           ")
-    print ("        Boutique : échangez vos jetons contre du matériel utilisable !     ")
+    print ("        Échangez vos jetons contre du matériel utilisable !                ")
     print ("                                                                           ")
-    print ("        Entrez simplement le nom de l'objet de votre choix,                ")
+    print ("        Choisissez simplement l'objet de votre choix,                      ")
     print ("        votre compte sera débité automatiquement.                          ")
-    print ("                                                 Jetons disponibles : %i   " % ego.jeto)
+    print ("                                                                           ")
+    print ("        Veuillez sélectionner la catégorie désirée.                        ")
+    print ("                                                                           ")
+    print ("  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
+    print ("      | o - Offense | d - Défense | s - Sérum |                            ")
+    print ("  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
+    print ("                                                                           ")
+    print (Colour.DARKCYAN + "   Touche Entrée pour retourner à l'antre" + Colour.END)
+    option = input(Colour.DARKCYAN + "   Votre choix -> " + Colour.END)
+    if option == "o":
+        go_shop_off()
+    elif option =="d":
+        go_shop_def()
+    elif option == "s":
+        go_shop_serum()
+    elif option =="":
+        go_hub()
+    else:
+        print("      Ce choix n'est pas valide")
+        go_arena()
+
+def go_shop_off():
+    os.system("clear")
+    print ("Catégorie : Offensif")
+    print ("  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
+    print ("                                                                           ")
+    print ("      Objet | Prix en jetons JTS | Description               Jetons disponibles : %i   " % ego.jeto)
     print ("                                                                           ")
     print ("  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
     print ("         ~ ~ ~ Armes ~ ~ ~                                                 ")
     print ("  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
     print ("                                                                           ")
-    print ("      Poignard antique                        | +   2 DGT   |     10 JTS   ")
-    print ("      Dague en plastacier                     | +   5 DGT   |     18 JTS   ")
-    print ("      Epée en chitine                         | +   8 DGT   |     25 JTS   ")
-    print ("      Fleuret de duel                         | +  10 DGT   |     70 JTS   ")
-    print ("      Epée monofilament                       | +  15 DGT   |     99 JTS   ")
-    print ("                                                                           ")
-    print ("  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
-    print ("          ~ ~ ~ Serum ~ ~ ~                                                ")
-    print ("  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
-    print ("                                                                           ")
-    print ("      Vivik                                   | +  50 VIE   |     25 JTS   ")
-    print ("      Mortak                                  | -  50 VIE   |     25 JTS   ")
+    shop_off = json.load(open("shop_off.txt"))
+    for indice, description in sorted(shop_off.items(), key=lambda x: x[1][1]):
+        print ("      {0:} - {1:10} JTS {2:} ({3:})".format(indice, description[0], description[1], description[2]))
     print ("                                                                           ")
     print ("  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
     print ("                                                                           ")
+    print (Colour.DARKCYAN + "   Touche Entrée pour retourner à l'interface boutique" + Colour.END)
     option = input(Colour.DARKCYAN + "   Votre choix -> " + Colour.END)
-
-    if option in equipment.Equipment.weapons:
-        if ego.jeto >= equipment.Equipment.weapons[option]:
-            ego.jeto -= equipment.Equipment.weapons[option]
-            # ego.weap.append(option)
-            print ("      Vous achetez l'objet %s." % option)
-            ego.curweap = option
-            option = input(Colour.DARKCYAN + "   Appuyez sur Entrée pour continuer..." + Colour.END)
-            go_store()
-
-        else:
-            print ("      Vous n'avez pas assez de jetons.")
-            option = input(Colour.DARKCYAN + "   Appuyez sur Entrée pour continuer..." + Colour.END)
-            go_store()
-
-    elif option in equipment.Equipment.serum:
-        if ego.jeto >= equipment.Equipment.serum[option]:
-            ego.jeto -= equipment.Equipment.serum[option]
+    if option == "":
+        go_shop()
+    elif option in shop_off:
+        if ego.jeto >= shop_off[option][0]:
+            ego.jeto -= shop_off[option]
             print ("      Vous achetez l'objet %s." % option)
             ego.serum += 1
-            option = input(Colour.DARKCYAN + "   Appuyez sur Entrée pour continuer..." + Colour.END)
-            go_store()
+            option = input(Colour.DARKCYAN + "   Touche Entrée pour continuer..." + Colour.END)
+            go_shop()
         else:
             print ("      Vous n'avez pas assez de jetons.")
-            option = input(Colour.DARKCYAN + "   Appuyez sur Entrée pour continuer..." + Colour.END)
-            go_store()
-    elif option == "":
-        go_hub()
+            option = input(Colour.DARKCYAN + "   Touche Entrée pour continuer..." + Colour.END)
+            go_shop()
     else:
         print ("      Cet objet n'existe pas !")
-        option = input(Colour.DARKCYAN + "   Appuyez sur Entrée pour continuer..." + Colour.END)
-        go_store()
-    return go_store
-# return status
+        option = input(Colour.DARKCYAN + "   Touche Entrée pour continuer..." + Colour.END)
+        go_shop()
+    return go_shop
+
+def go_shop_def():
+    os.system("clear")
+    print ("Catégorie : Défensif")
+    print ("  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
+    print ("                                                                           ")
+    print ("      Objet | Prix en jetons JTS | Description               Jetons disponibles : %i   " % ego.jeto)
+    print ("                                                                           ")
+    print ("  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
+    print ("         ~ ~ ~ Armures ~ ~ ~                                                 ")
+    print ("  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
+    print ("                                                                           ")
+    shop_def = json.load(open("shop_def.txt"))
+    for indice, description in sorted(shop_def.items(), key=lambda x: x[1][1]):
+        print ("      {0:} - {1:10} JTS {2:} ({3:})".format(indice, description[0], description[1], description[2]))
+    print ("                                                                           ")
+    print ("  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
+    print ("                                                                           ")
+    print (Colour.DARKCYAN + "   Touche Entrée pour retourner à l'interface boutique" + Colour.END)
+    option = input(Colour.DARKCYAN + "   Votre choix -> " + Colour.END)
+    if option == "":
+        go_shop()
+
+def go_shop_serum():
+    os.system("clear")
+    print ("Catégorie : Sérum")
+    print ("  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
+    print ("                                                                           ")
+    print ("      Objet | Prix en jetons JTS | Description               Jetons disponibles : %i   " % ego.jeto)
+    print ("                                                                           ")
+    print ("  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")    
+    print ("          ~ ~ ~ Sérum ~ ~ ~                                                ")
+    print ("  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
+    print ("                                                                           ")
+    shop_serum = json.load(open("shop_serum.txt"))
+    for indice, description in sorted(shop_serum.items(), key=lambda x: x[1][1]):
+        print ("      {0:} - {1:10} JTS {2:} ({3:})".format(indice, description[0], description[1], description[2]))
+    print ("                                                                           ")
+    print ("  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
+    print ("                                                                           ")
+    print (Colour.DARKCYAN + "   Touche Entrée pour retourner à l'interface boutique" + Colour.END)
+    option = input(Colour.DARKCYAN + "   Votre choix -> " + Colour.END)
+    if option == "":
+        go_shop()
+    elif option in shop_serum:
+        if ego.jeto >= shop_serum[option][1]:
+            ego.jeto -= shop_serum[option][1]
+            print ("      Vous achetez l'objet " + Colour.GREEN + "{} ".format(description[0]) + Colour.END + "pour " + Colour.RED + "{} jetons".format(description[1]) + Colour.END + ".")
+            ego.serum += 1
+            option = input(Colour.DARKCYAN + "   Touche Entrée pour continuer..." + Colour.END)
+            go_shop()
+        else:
+            print ("      Vous n'avez pas assez de jetons.")
+            option = input(Colour.DARKCYAN + "   Touche Entrée pour continuer..." + Colour.END)
+            go_shop()
+    else:
+        print ("      Cet objet n'existe pas !")
+        option = input(Colour.DARKCYAN + "   Touche Entrée pour continuer..." + Colour.END)
+        go_shop()
+    return go_shop
 
 def go_mutation_prepare():
     print ("Mutation !")
     time.sleep(2)
     pass
-#     if ego
-#     return go_mutation
 
 def go_help():
     os.system("clear")
@@ -298,7 +377,7 @@ def go_help():
     print ("                                                                           ")
     print ("  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
     print ("")
-    option = input(Colour.DARKCYAN + "   Appuyez sur Entrée pour continuer..." + Colour.END)
+    option = input(Colour.DARKCYAN + "   Touche Entrée pour continuer..." + Colour.END)
     go_hub()
 
 
@@ -311,17 +390,17 @@ def do_serum():
         else :
             ego.health += 50
             print ("      Vous injectez le sérum et constatez un effet " + Colour.GREEN + "positif " + Colour.END + "sur votre organisme.")
-            option = input(Colour.DARKCYAN + "   Appuyez sur Entrée pour continuer..." + Colour.END)
+            option = input(Colour.DARKCYAN + "   Touche Entrée pour continuer..." + Colour.END)
             go_info()
     else :
-        print ("      Vous n'en avez pas. Vous pouvez échanger vos jetons à la boutique contre du serum.")
-        option = input(Colour.DARKCYAN + "   Appuyez sur Entrée pour continuer..." + Colour.END)
+        print ("      Vous n'en avez pas. Vous pouvez échanger vos jetons à la boutique contre du sérum.")
+        option = input(Colour.DARKCYAN + "   Touche Entrée pour continuer..." + Colour.END)
         go_info()
 #    return go_info()
 
 
 def go_expedition_prepare():
-    option = input(Colour.DARKCYAN + "   Appuyez sur Entrée pour continuer..." + Colour.END)
+    option = input(Colour.DARKCYAN + "   Touche Entrée pour continuer..." + Colour.END)
     expedition.ExpeditionPrepare.expedition_prepare()
 
 def go_info():
@@ -338,8 +417,8 @@ def go_info():
     print ("                                                                           ")
     print ("  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
     print ("                                                                           ")
-    print ("      s - injecter un serum (reste %s)                                     " % (ego.serum))
-    print ("      t - retourner à l'antre                                              ")
+    print ("      s - injecter un sérum (reste %s)                                     " % (ego.serum))
+    print ("      t (ou Entrée) - retourner à l'antre                                  ")
     print ("")
     print ("  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
     print ("")
@@ -347,6 +426,8 @@ def go_info():
     if option == "s":
         do_serum()
     elif option == "t":
+        go_hub()
+    elif option =="":
         go_hub()
     else:
         print("Ce choix n'est pas valide")
@@ -356,7 +437,8 @@ def win():
 #    os.system("clear")
     ego.abo += challenger.abogain
     ego.jeto += challenger.jetogain
-    ego.matorg += challenger.matorg
+    ego.matorg += (challenger.matorg/2)
+    print ("                                                                           ")
     print ("Victoire")
     print ("  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
     print ("                                                                           ")
@@ -365,11 +447,11 @@ def win():
     print ("      Vous avez vaincu votre adversaire %s.                                " % challenger.name)
     print ("      Vous avez %s nouveaux abonnés.                                       " % challenger.abogain)
     print ("      Votre récompense pour ce combat est de %i jetons.                    " % challenger.jetogain)
-    print ("      Vous assimilez %i matorg.                                            " % challenger.matorg)
+    print ("      Vous assimilez %i matorg.                                            " % (challenger.matorg/2))
     print ("                                                                           ")
     print ("  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
     print ("                                                                           ")
-    option = input(Colour.DARKCYAN + "   Appuyez sur Entrée pour continuer..." + Colour.END)
+    option = input(Colour.DARKCYAN + "   Touche Entrée pour continuer..." + Colour.END)
     challenger.health = challenger.maxhealth
     ego.buff += 2
     if ego.buff > 1 :
@@ -396,9 +478,10 @@ def lose():
     if ego.buff < 1 :
         ego.health += ego.buff
         if ego.health < 1 :
-            option = input(Colour.DARKCYAN + "   G A M E   O V E R ..." + Colour.END)
+            option = input(Colour.DARKCYAN + "   P A R T I E   T E R M I N É E..." + Colour.END)
             sys.exit()
         else :
+            print ("                                                                           ")
             print ("Défaite")
             print ("  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
             print ("                                                                           ")
@@ -410,7 +493,7 @@ def lose():
             print ("                                                                           ")
             print ("  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
             print ("                                                                           ")
-            option = input(Colour.DARKCYAN + "   Appuyez sur Entrée pour continuer..." + Colour.END)
+            option = input(Colour.DARKCYAN + "   Touche Entrée pour continuer..." + Colour.END)
             challenger.health = challenger.maxhealth
             go_hub()
 
@@ -431,7 +514,7 @@ class AvatarBody(object):
         print ("                                                                       ")
         print ("  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
         print ("                                                                       ")
-        option = input(Colour.DARKCYAN + "   Appuyez sur Entrée pour continuer..." + Colour.END).lower()
+        option = input(Colour.DARKCYAN + "   Touche Entrée pour continuer..." + Colour.END).lower()
         AvatarBody.tool_choice()
 
     def tool_choice():
@@ -452,14 +535,14 @@ class AvatarBody(object):
             for tool in tool_list:
                 if tool not in ("corne", "griffe", "queue", "dent", "ventouse", "dard", "main", "pince", "crochet"):
                     print ("   Au moins un de vos choix n'est pas valide. Veuillez recommencer.")
-                    option = input(Colour.DARKCYAN + "   Appuyez sur Entrée pour continuer..." + Colour.END).lower()
+                    option = input(Colour.DARKCYAN + "   Touche Entrée pour continuer..." + Colour.END).lower()
                     os.system("clear")
                     AvatarBody.tool_choice()
             else:
                 AvatarBody.sens_choice()
         else :
             print ("   Au moins un de vos choix n'est pas valide. Veuillez recommencer.")
-            option = input(Colour.DARKCYAN + "   Appuyez sur Entrée pour continuer..." + Colour.END).lower()
+            option = input(Colour.DARKCYAN + "   Touche Entrée pour continuer..." + Colour.END).lower()
             os.system("clear")
             AvatarBody.tool_choice()
 
@@ -481,14 +564,14 @@ class AvatarBody(object):
             for sens in sens_list:
                 if sens not in ("vue", "ouïe", "toucher", "odorat", "goût", "sonar", "thermos", "radios", "magnos"):
                     print ("   Au moins un de vos choix n'est pas valide. Veuillez recommencer.")
-                    option = input(Colour.DARKCYAN + "   Appuyez sur Entrée pour continuer..." + Colour.END).lower()
+                    option = input(Colour.DARKCYAN + "   Touche Entrée pour continuer..." + Colour.END).lower()
                     os.system("clear")
                     AvatarBody.skin_choice()
             else:
                 AvatarBody.skin_choice()
         else:
             print ("   Au moins un de vos choix n'est pas valide. Veuillez recommencer.")
-            option = input(Colour.DARKCYAN + "   Appuyez sur Entrée pour continuer..." + Colour.END).lower()
+            option = input(Colour.DARKCYAN + "   Touche Entrée pour continuer..." + Colour.END).lower()
             os.system("clear")
             AvatarBody.sens_choice()
 
@@ -510,14 +593,14 @@ class AvatarBody(object):
             for skin in skin_list:
                 if skin not in ("peau", "poils", "plumes", "écailles", "cuir", "fourrure", "plaques", "cheveux", "tissu"):
                     print ("   Au moins un de vos choix n'est pas valide. Veuillez recommencer.")
-                    option = input(Colour.DARKCYAN + "   Appuyez sur Entrée pour continuer..." + Colour.END).lower()
+                    option = input(Colour.DARKCYAN + "   Touche Entrée pour continuer..." + Colour.END).lower()
                     os.system("clear")
                     AvatarBody.skin_choice()
             else:
                 AvatarBody.body_resume()
         else:
             print ("   Au moins un de vos choix n'est pas valide. Veuillez recommencer.")
-            option = input(Colour.DARKCYAN + "   Appuyez sur Entrée pour continuer..." + Colour.END).lower()
+            option = input(Colour.DARKCYAN + "   Touche Entrée pour continuer..." + Colour.END).lower()
             os.system("clear")
             AvatarBody.skin_choice()
 
@@ -534,7 +617,7 @@ class AvatarBody(object):
         # print ("- deux organes de sens : %s, %s, %s." % (sens1, sens2))
         # print ("- Votre corps est recouvert de : %s." % (skin1))
         # option=input("")
-        option = input(Colour.DARKCYAN + "   Appuyez sur Entrée pour continuer..." + Colour.END).lower()
+        option = input(Colour.DARKCYAN + "   Touche Entrée pour continuer..." + Colour.END).lower()
         go_hub()
 
 if __name__ == '__main__':
