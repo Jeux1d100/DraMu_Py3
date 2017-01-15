@@ -1,8 +1,33 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
 import random
-# from avatar import Creature
+
+class Muscae(object):
+    def __init__(self, name):
+        self.name = name
+        self.description = ("Une mouche grosse comme une main.")
+        self.maxhealth = 5
+        self.health = self.maxhealth
+        self.matorg = 2
+        self.baseattack = 1
+        self.jetogain = 1
+        self.aboneed = 0
+        self.abogain = 1
+muscae_active = Muscae("Muscae")
+
+class Rodentia(object):
+    def __init__(self, name):
+        self.name = name
+        self.description = ("Un lapin aux oreilles percées.")
+        self.maxhealth = 10
+        self.health = self.maxhealth
+        self.matorg = 4
+        self.baseattack = 2
+        self.jetogain = 3
+        self.aboneed = 0
+        self.abogain = 2
+rodentia_active = Rodentia("Rodentia")
 
 class Caninae(object):
     def __init__(self, name):
@@ -10,11 +35,11 @@ class Caninae(object):
         self.description = ("Un chien sauvage, affaibli par la faim et la maladie.")
         self.maxhealth = 20
         self.health = self.maxhealth
-        self.matorg = 70 # organic material
+        self.matorg = 7
         self.baseattack = 4
-        self.jetogain = 5 # tokens given to player when defeated
-        self.aboneed = 0 # number of followers needed to spawn
-        self.abogain = 5 # followers given to player when defeated
+        self.jetogain = 5
+        self.aboneed = 0
+        self.abogain = 5
 caninae_active = Caninae("Caninae")
 
 class Casuariidae(object):
@@ -23,7 +48,7 @@ class Casuariidae(object):
         self.description = ("Cet imposant oiseau ne sait peut-être pas voler, mais son bec et ses longues pattes griffues sont mortels.")
         self.maxhealth = 50
         self.health = self.maxhealth
-        self.matorg = 70
+        self.matorg = 12
         self.baseattack = 10
         self.jetogain = 15
         self.aboneed = 6
@@ -36,7 +61,7 @@ class BiOurs(object):
         self.description = ("Cet ours...")
         self.maxhealth = 70
         self.health = self.maxhealth
-        self.matorg = 70
+        self.matorg = 20
         self.baseattack = 15
         self.jetogain = 30
         self.aboneed = 20
@@ -49,7 +74,7 @@ class Crocaillou(object):
         self.description = ("Vu de loin, on dirait bien un rocher, et pourtant, il bouge.")
         self.maxhealth = 100
         self.health = self.maxhealth
-        self.matorg = 100
+        self.matorg = 5
         self.baseattack = 20
         self.jetogain = 50
         self.aboneed = 70
@@ -62,7 +87,7 @@ class Proboscidea(object):
         self.description = ("Un animal énorme, aussi gras que musclé, avec deux formidables trompes sur la face.")
         self.maxhealth = 150
         self.health = self.maxhealth
-        self.matorg = 150
+        self.matorg = 50
         self.baseattack = 30
         self.jetogain = 75
         self.aboneed = 300
@@ -70,7 +95,7 @@ class Proboscidea(object):
 proboscidea_active = Proboscidea("Proboscidea")
 
 # BESTIARY = (Caninae, Casuariidae, BiOurs, Crocaillou, Proboscidea)
-BESTIARY = (caninae_active, casuariidae_active, biours_active, crocaillou_active, proboscidea_active)
+BESTIARY = (muscae_active, rodentia_active, caninae_active, casuariidae_active, biours_active, crocaillou_active, proboscidea_active)
 
 # num_to_select = 2 # set the number to select here.
 # list_of_random_items = random.sample(BESTIARY, num_to_select)
