@@ -76,6 +76,11 @@ class Avatar(object):
             else :
                 Avatar.do_attack()
 
+    def do_flee():
+        print ("Oups, en développement...")
+        time.sleep(2)
+        Avatar.do_attack()
+
     def do_quit():
 #        os.system("clear")
         sys.exit()
@@ -131,7 +136,7 @@ def avatar_creation_name():
 def go_hub():
     while True:
         os.system("clear")
-        taxe = 20
+        taxe = 10
         # for indice, description in sorted(ego.inventory.items(), key=lambda x: x[0][1][1]):
         #     print ("      {0:} - {1:10} JTS {2:} ({3:})".format(indice, description[0], description[1], description[2]))
         # for indice, description in sorted(ego.inventory.items(), key=lambda x: x[1][1][1]):
@@ -196,7 +201,7 @@ def select_challenger():
     print ("Introduction")
     print ("  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
     print ("                                                                           ")
-    print ("      Vous payez la taxe universelle d'organisation, d'un montant de " + Colour.RED + "20 JTS" + Colour.END + ".")
+    print ("      Vous payez la taxe universelle d'organisation.                       ")
     print ("                                                                           ")
     intro = json.load(open("intro.txt"))
     for i, blabla in sorted(intro.items(), key=lambda x:x[0]):
