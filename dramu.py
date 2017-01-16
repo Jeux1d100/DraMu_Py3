@@ -29,13 +29,21 @@ class Colour:
 class Avatar(object):
     def __init__(self, name):
         self.name = name # Nom de l'ego (avatar du joueur)
+
         self.baseattack = 5 # Attaque de base de l'ego
         self.curweap = "Aucune" # Arme équipée, qui s'ajoute à baseattack
+
         self.jeto = 50 # total de Jetons, monnaie du DraMu
-        self.abo = 10 # total d'abonnés, ressource
+        self.abo = 100 # total d'abonnés, ressource
         self.safeabo = 1
         self.matorg = 50 # actuelle Matière Organique, ressource vitale
         self.maxmatorg = 100
+        
+        self.nerf = 0 # Cerveau (Action + Agilité)
+        self.fluide = 0 # Cœur (Puissance + Résistance)
+        self.chimie = 0 # Glande (Pouvoir + Cohésion)
+        self.gaz = 0 # Poumon (Endurance + Résérve)
+
         self.rubujo = 0 # Total de Rubujoj (déchets), ressource
         self.serum = 3 # Total de sérum, potion de soin et autre drogues
         self.inventory = json.load(open("inventory.txt"))
@@ -56,7 +64,7 @@ class Avatar(object):
         while ego.matorg > 0 :
             challenger.health -= ego_attack
             print ("")
-            print ("      Vous infligez {} dégâts ".format(ego_attack) + Colour.END + "à l'adversaire.")
+            print ("      Vous infligez " + Colour.GREEN + "{} dégâts ".format(ego_attack) + Colour.END + "à l'adversaire.")
             if challenger.health < 1:
                 win()
             else:
@@ -77,16 +85,17 @@ def main():
     print ("Menu")
     print ("  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
     print ("                                                                        ")
-    print (Colour.GREEN + "         DraMu 170115_01                          " + Colour.END)
+    print (Colour.YELLOW + "    DraMu 1701_01 | Développé par Tchey | http://jeux1d100.net" + Colour.END)
     print ("                                                                           ")
     print ("  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
     print ("                                                                           ")
     print ("      n - nouvelle partie                                                  ")
     print ("                                                                           ")
-    print ("      q (ou Entrée) - quitter                                              ")
+    print ("      q - quitter                                              ")
     print ("                                                                           ")
     print ("  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
     print ("                                                                           ")
+    print (Colour.DARKCYAN + "   Touche Entrée pour commencer une nouvelle partie" + Colour.END)
     option = input(Colour.DARKCYAN + "   Votre choix -> " + Colour.END).lower()
     if option =="n":
         avatar_creation_name()
@@ -97,7 +106,7 @@ def main():
     elif option =="w":
         go_hub()
     elif option =="":
-        sys.exit()
+        avatar_creation_name()
     else:
         main()
 
@@ -110,9 +119,10 @@ def avatar_creation_name():
     print ("")
     print ("  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
     print ("")
+    print (Colour.DARKCYAN + "   Touche Entrée pour le nom par défaut : Vakog" + Colour.END)
     option = input(Colour.DARKCYAN + "   Choisissez un nom -> " + Colour.END)
     while not option :
-        option = input(Colour.DARKCYAN + "   Choisissez un nom -> " + Colour.END)
+        option = "Vakog"
     global ego
     ego = Avatar(option)
     go_hub()
@@ -121,6 +131,7 @@ def avatar_creation_name():
 def go_hub():
     while True:
         os.system("clear")
+        taxe = 20
         # for indice, description in sorted(ego.inventory.items(), key=lambda x: x[0][1][1]):
         #     print ("      {0:} - {1:10} JTS {2:} ({3:})".format(indice, description[0], description[1], description[2]))
         # for indice, description in sorted(ego.inventory.items(), key=lambda x: x[1][1][1]):
@@ -136,21 +147,34 @@ def go_hub():
         print ("                                                                           ")
         print ("  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
         print ("                                                                           ")
-        print ("      a - combattre dans l'arène                                           ")
-        print ("      b - entrer dans la boutique                                          ")
-        print ("      m - développer une mutation                                          ")
-        print ("      x - préparer une expédition                                          ")
-        print ("      i - consulter l'inventaire                                           ")
-        print ("      ? - ouvrir une page d'aide                                           ")
+        print ("      a - combattre dans l'arène " + Colour.LPURPLE + "(activité soumise à la taxe universelle d'organisation : " + Colour.END + Colour.RED + "{} JTS".format(taxe) + Colour.END + ")")
+        print ("      b - entrer dans la boutique " + Colour.LPURPLE + "(matériel certifié conforme aux réglementations en vigueur)" + Colour.END)
+        print ("      m - développer une mutation " + Colour.LPURPLE + "(science expérimentale, résultats non garantis)" + Colour.END)
+        print ("      x - préparer une expédition " + Colour.LPURPLE + "(la responsabilité du système ne saurait être engagée)" + Colour.END)
+        print ("      i - consulter l'inventaire " + Colour.LPURPLE + "(synchronisation aux serveurs sous réserve)" + Colour.END)
+        print ("      ? - ouvrir une page d'aide " + Colour.LPURPLE + "(sources anonymes, informations non contractuelles)" + Colour.END)
         print ("                                                                           ")
-        print ("      q - quitter DraMu                                                    ")
+        print ("      q - quitter DraMu " + Colour.LPURPLE + "(assistance psychomédicale à la charge de l'utilisateur)" + Colour.END)
         print ("                                                                           ")
         print ("  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
         print ("                                                                           ")
         print (Colour.DARKCYAN + "   Touche Entrée pour combattre dans l'arène" + Colour.END)
         option = input(Colour.DARKCYAN + "   Votre choix -> " + Colour.END).lower()
-        if option == "a":
-            select_challenger()
+
+        if option == "":
+            if ego.jeto > taxe :
+                ego.jeto -= taxe
+                select_challenger()
+            else :
+                option = input(Colour.DARKCYAN + "   Vous ne pouvez pas vous acquitter de la taxe universelle d'organisation. " + Colour.END).lower()
+                go_hub()
+        elif option == "a":
+            if ego.jeto > taxe :
+                ego.jeto -= taxe
+                select_challenger()
+            else :
+                option = input(Colour.DARKCYAN + "   Vous ne pouvez pas vous acquitter de la taxe universelle d'organisation. " + Colour.END).lower()
+                go_hub()
         elif option == "b":
             go_shop()
         elif option == "m":
@@ -163,8 +187,6 @@ def go_hub():
             go_help()
         elif option == "q": #arrêter le programme et sortir
             sys.exit()
-        elif option == "":
-            select_challenger()
         else:
             print("      Ce choix n'est pas valide")
             go_hub()
@@ -173,6 +195,8 @@ def select_challenger():
     os.system("clear")
     print ("Introduction")
     print ("  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
+    print ("                                                                           ")
+    print ("      Vous payez la taxe universelle d'organisation, d'un montant de " + Colour.RED + "20 JTS" + Colour.END + ".")
     print ("                                                                           ")
     intro = json.load(open("intro.txt"))
     for i, blabla in sorted(intro.items(), key=lambda x:x[0]):
@@ -368,13 +392,13 @@ def go_help():
     print ("Aide")
     print ("  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
     print ("                                                                           ")
-    print ("        Vocabulaire et termes employés                                     ")
+    print (Colour.YELLOW + "      Vocabulaire et termes employés                       " + Colour.END)
     print ("                                                                           ")
     print ("        Zum', rubujo... sont des mots en langue espéranto (http://esperanto-france.org/)     ")
     print ("        Zumo = bourdonnement, utilisé au ici au sens de ""buzz sur internet""  ")
     print ("        Rubujo = dêchet, rebu, poubelle. Utilisé pour nommer une ressource, des bidules de récupération...")
     print ("                                                                           ")
-    print ("        Règles du jeu                                                      ")
+    print (Colour.YELLOW + "      Règles du jeu                                        " + Colour.END)
     print ("                                                                           ")
     print ("        Combattez dans l'arène pour gagner des abonnés et des jetons.      ")
     print ("        A chaque victoire, vous assimilez la matorg de l'adversaire,       ")
@@ -451,9 +475,14 @@ def go_info():
 
 def win():
 #    os.system("clear")
-
+    ego.abo += challenger.abogain
+    ego.jeto += challenger.jetogain
+    if ego.matorg < ego.maxmatorg :
+        ego.matorg += challenger.matorg
+    if ego.matorg > ego.maxmatorg :
+        ego.matorg = ego.maxmatorg
     print ("                                                                           ")
-    print (Colour.GREEN + "  ! Victoire ! Victoire ! Victoire ! Victoire ! Victoire ! Victoire ! Victoire ! Victoire ! Victoire ! " + Colour.END)
+    print (Colour.GREEN + "  ! Victoire !   ! Victoire !   ! Victoire !   ! Victoire !   ! Victoire !" + Colour.END)
     print ("  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
     print ("                                                                           ")
     print ("            {} ({}/{})   vs   {} ({}/{})                                   ".format(ego.name, ego.matorg, ego.maxmatorg, challenger.name, challenger.health, challenger.maxhealth))
@@ -466,41 +495,35 @@ def win():
     print ("  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
     print ("                                                                           ")
     option = input(Colour.DARKCYAN + "   Touche Entrée pour continuer..." + Colour.END)
-    challenger.health = challenger.maxhealth
-    ego.abo += challenger.abogain
-    ego.jeto += challenger.jetogain
-    if ego.matorg < ego.maxmatorg :
-        ego.matorg += challenger.matorg
-        if ego.matorg > ego.maxmatorg :
-            ego.matorg = ego.maxmatorg
+    challenger.health = challenger.maxhealth 
     go_hub()
 
 def lose():
     #os.system("clear")
     # if ego.matorg < 1 :
     #     print ("    - Vous êtes détruit, il ne reste rien de vous. F I N -   ")
-    #     sys.exit()
-    challenger.health = challenger.maxhealth    
-    if ego.abo > int(challenger.abogain/2) :
-        ego.abo -= int(challenger.abogain/2)
+    #     sys.exit()   
+    if ego.abo > int(challenger.abogain/20) :
+        ego.abo -= int(challenger.abogain/20)
     else :
         ego.abo = 1
     ego.safeabo = 1 + int(ego.abo /10)
     ego.matorg = ego.safeabo
     ego.jeto += int(challenger.jetogain/4)
     print ("                                                                           ")
-    print (Colour.RED + "  ! Défaite ! Défaite ! Défaite ! Défaite ! Défaite ! Défaite ! Défaite ! Défaite ! Défaite ! " + Colour.END)
+    print (Colour.RED + "  ! Défaite !   ! Défaite !   ! Défaite !   ! Défaite !   ! Défaite !" + Colour.END)
     print ("  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
     print ("                                                                           ")
     print ("            {} ({}/{})   vs   {} ({}/{})                        ".format(ego.name, ego.matorg, ego.maxmatorg, challenger.name, challenger.health, challenger.maxhealth))
     print ("                                                                           ")
-    print ("      L'adversaire vous domine. Vous perdez des " + Colour.RED + "abonnés potentiels : -{}".format(int(challenger.abogain/2)) + Colour.END + ".")
+    print ("      L'adversaire vous domine. Vous perdez des " + Colour.RED + "abonnés potentiels : -{}".format(int(challenger.abogain/20)) + Colour.END + ".")
     print ("      Votre compensation pour participer à ce combat est de " + Colour.GREEN + "{} jetons".format(int(challenger.jetogain/4)) + Colour.END + ".")
     print ("      Quelques-uns de vos plus fervents abonnés se sacrifient,")
     print ("      vous permettant de repartir avec " + Colour.GREEN + "{} matorg".format(ego.safeabo) + Colour.END + ".")
     print ("  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
     print ("                                                                           ")
     option = input(Colour.DARKCYAN + "   Touche Entrée pour continuer..." + Colour.END)
+    challenger.health = challenger.maxhealth 
     go_hub()
 
 class AvatarBody(object):
